@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">UserLog</string>
+    <string name="gsheet_APIKEY">AIzaSyBi1x-Q65KAJjeHOBFylxOn1BWYeCnzGzs</string>
+    <string name="title">USER LOG</string>
+    <string name="network_error">No Internet!</string>
+    <string name="log_data">Log Data</string>
+
+</resources>
