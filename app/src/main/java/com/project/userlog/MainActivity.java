@@ -11,6 +11,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -37,7 +38,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 
 
 public class MainActivity extends AppCompatActivity {
@@ -71,15 +71,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     /*On Button Click - logData()
-    *
-    * Check for Permission
-    * Get the location, email and current time - getLocation()
-    * Send the Request using Volley - sendRequest()
-    * If Permission Denied - showDialog();
-    *
-    * */
+     *
+     * Check for Permission
+     * Get the location, email and current time - getLocation()
+     * Send the Request using Volley - sendRequest()
+     * If Permission Denied - showDialog();
+     *
+     * */
 
-    public void logData(View view)  {
+    public void logData(View view) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             progressBar.setVisibility(View.VISIBLE);
@@ -106,12 +106,19 @@ public class MainActivity extends AppCompatActivity {
                                 Calendar calendar = Calendar.getInstance();
                                 int hours = calendar.get(Calendar.HOUR_OF_DAY);
                                 int min = calendar.get(Calendar.MINUTE);
-                                time = hours+":"+min;
+                                time = hours + ":" + min;
                                 email = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-                                if(currLocation != null){
-                                    location = (int)currLocation.getLatitude() + "'" +(int)currLocation.getLongitude()+"''";
-                                }else{
-                                    location = "NA";
+                                if (currLocation != null) {
+                                    location = (int) currLocation.getLatitude() + "'" + (int) currLocation.getLongitude() + "''";
+                                } else {
+                                    LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+                                    if (checkPermission()) {
+                                        Location locationCurrent = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                                        location = (int)locationCurrent.getLatitude() + "'"+ (int)locationCurrent.getLongitude()+"''";
+                                    }else{
+                                        showDialog();
+                                        location = "";
+                                    }
                                 }
                                 sendRequest();
                             }
@@ -214,5 +221,10 @@ public class MainActivity extends AppCompatActivity {
         if (queue != null) {
             queue.cancelAll(TAG);
         }
+    }
+
+    public  boolean checkPermission(){
+        return ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 }
