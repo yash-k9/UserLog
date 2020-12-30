@@ -1,14 +1,19 @@
 package com.project.userlog;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import android.Manifest;
+import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -48,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     TextView status;
     Button submit;
     View parentLayout;
+    Activity activity;
     ProgressBar progressBar;
 
     @Override
@@ -57,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         status = findViewById(R.id.status);
         submit = findViewById(R.id.submit);
+        activity = this;
         progressBar = findViewById(R.id.progress_bar);
         parentLayout = findViewById(android.R.id.content);
         fusedLocationProviderClient = new FusedLocationProviderClient(this);
@@ -68,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     * Check for Permission
     * Get the location, email and current time - getLocation()
     * Send the Request using Volley - sendRequest()
+    * If Permission Denied - showDialog();
     *
     * */
 
@@ -75,6 +83,7 @@ public class MainActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             progressBar.setVisibility(View.VISIBLE);
+            submit.setClickable(false);
             getLocation();
 
         } else {
@@ -110,6 +119,8 @@ public class MainActivity extends AppCompatActivity {
                     });
                 }
             });
+        }else{
+            showDialog();
         }
     }
 
@@ -122,14 +133,41 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, response);
             progressBar.setVisibility(View.GONE);
             Snackbar.make(parentLayout, "Data Logged Successfully", Snackbar.LENGTH_LONG).show();
+            submit.setClickable(true);
         }, error -> {
             progressBar.setVisibility(View.GONE);
             Log.d(TAG, ""+error.getMessage());
             Snackbar.make(parentLayout, "Network Error !", Snackbar.LENGTH_LONG).show();
+            submit.setClickable(true);
         });
 
         stringRequest.setTag(TAG);
         queue.add(stringRequest);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(grantResults[0] != PackageManager.PERMISSION_GRANTED){
+            showDialog();
+        }
+    }
+
+    private void showDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setMessage("This Application needs GPS to function")
+                .setPositiveButton("Enable", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package", getPackageName(), null);
+                        intent.setData(uri);
+                        startActivity(intent);
+                    }
+                });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 
 
