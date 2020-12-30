@@ -82,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
     public void logData(View view) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
-            progressBar.setVisibility(View.VISIBLE);
             submit.setClickable(false);
             getLocation();
 
@@ -94,6 +93,7 @@ public class MainActivity extends AppCompatActivity {
     private void getLocation() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            progressBar.setVisibility(View.VISIBLE);
             fusedLocationProviderClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>() {
                 @Override
                 public void onComplete(@NonNull Task<Location> task) {
@@ -158,6 +158,9 @@ public class MainActivity extends AppCompatActivity {
         if(grantResults[0] != PackageManager.PERMISSION_GRANTED){
             showDialog();
         }
+        else{
+            getLocation();
+        }
     }
 
     private void showDialog() {
@@ -211,9 +214,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateToLoginUI() {
         Intent intent = new Intent(this, Login.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
-        this.finish();
     }
+
 
     @Override
     protected void onStop () {
