@@ -117,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
                                         location = (int)locationCurrent.getLatitude() + "'"+ (int)locationCurrent.getLongitude()+"''";
                                     }else{
                                         showDialog();
-                                        location = "";
                                     }
                                 }
                                 sendRequest();
@@ -206,7 +205,6 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }
                         });
-                updateToLoginUI();
                 break;
         }
         return true;
